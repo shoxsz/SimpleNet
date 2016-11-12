@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-namespace nsa{
+namespace snet{
 	class TcpAcceptor : public Socket{
 	public:
 		enum ErrorStage{

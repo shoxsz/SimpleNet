@@ -4,7 +4,7 @@
 #include "socket_base.hpp"
 #include "network_message.hpp"
 
-namespace nsa{
+namespace snet{
 	/*A socket stream is used to keep a message flow with an endpoint socket*/
 	class SocketStream : public Socket{
 	public:

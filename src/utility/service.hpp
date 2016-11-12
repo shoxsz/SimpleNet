@@ -7,7 +7,7 @@
 #include <chrono>
 #include <memory>
 
-namespace nsa{
+namespace snet{
     class ServiceManager;
 
     class Service{

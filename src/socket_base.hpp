@@ -1,13 +1,12 @@
 #ifndef _SOCKET_BASE_HPP_
 #define _SOCKET_BASE_HPP_
 
-#include "..\..\..\..\exception.hpp"
-
 #include <string>
 #include <chrono>
+#include <exception>
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #else
 #include <sys/types.h>
 #include <sys/sockets.h>
@@ -16,7 +15,21 @@
 #include <netdb.h>
 #endif
 
-namespace nsa{
+namespace snet{
+
+#ifdef _WIN32
+	WSADATA initWinApiSock(){
+		WSADATA data;
+		if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
+			throw SocketError(Exception::getSystemError());
+		return data;
+	}
+
+	void shutDownWinApiSock(){
+		if (WSACleanup() == SOCKET_ERROR)
+			throw SocketError(Exception::getSystemError());
+	}
+#endif
 
 	class SocketError : public std::exception{
     public:
@@ -72,11 +85,6 @@ namespace nsa{
 	to provide additional functionality.*/
 	class Socket{
 	public:
-
-		static WSADATA initWinApiSock();
-
-		static void shutDownWinApiSock();
-
 		Socket();
 		virtual ~Socket();
 
@@ -85,9 +93,12 @@ namespace nsa{
 
 		unsigned long getAvailableData();
 
-		/*wait data for read for the specfied amount of time, return true if the data is available.*/
 		bool waitRead(std::chrono::milliseconds timeout){
 			return testOperation(sock_fd, READ, timeout.count());
+		}
+
+		bool waitWrite(std::chrono::milliseconds timeout){
+			return testOperation(sock_fd, WRITE, timeout.count());
 		}
 
 		bool canRead(){
@@ -108,7 +119,7 @@ namespace nsa{
 
 	protected:
 		//will be called in the close method before the socket is closed.
-		virtual void shutdown(){}
+		virtual void closing(){}
 
 		unsigned short sock_fd;
 		bool valid;

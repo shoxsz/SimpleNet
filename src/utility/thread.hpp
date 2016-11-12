@@ -3,7 +3,7 @@
 
 #include <thread>
 
-namespace nsa{
+namespace snet{
 	class Thread{
 	public:
 		enum ThreadState{

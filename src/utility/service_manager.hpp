@@ -5,7 +5,7 @@
 
 #include <unordered_map>
 
-namespace nsa{
+namespace snet{
     /*Use a thread group here*/
     class ServiceManager{
     private:

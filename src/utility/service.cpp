@@ -2,7 +2,7 @@
 
 #include "service_manager.hpp"
 
-using namespace nsa;
+using namespace snet;
 
 void Service::wait(){
     while(stream->isValid()){

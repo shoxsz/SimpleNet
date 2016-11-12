@@ -8,7 +8,7 @@
 #include <list>
 #include <condition_variable>
 
-namespace nsa{
+namespace snet{
 	class Scheduler : public Thread{
 	public:
 

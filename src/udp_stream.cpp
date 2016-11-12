@@ -1,6 +1,6 @@
 #include "udp_stream.hpp"
 
-using namespace nsa;
+using namespace snet;
 
 #define gmin(a, b) (((a) < (b)) ? (a) : (b))
 

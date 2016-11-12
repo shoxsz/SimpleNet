@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace nsa{
+namespace snet{
 	/*A network message is a simple buffer to write and read data*/
 	class NetworkMessage{
 	public:

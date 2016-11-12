@@ -1,6 +1,6 @@
 #include "scheduler.hpp"
 
-using namespace nsa;
+using namespace snet;
 
 void Scheduler::addTask(Task* task, bool pushFront){
 	bool wasEmpty = false; 

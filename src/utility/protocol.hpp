@@ -3,7 +3,7 @@
 
 #include "network_message.hpp"
 
-namespace nsa{
+namespace snet{
 	class Service;
 
 	class Protocol{

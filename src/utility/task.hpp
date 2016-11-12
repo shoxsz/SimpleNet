@@ -4,7 +4,7 @@
 #include <functional>
 #include <chrono>
 
-namespace nsa{
+namespace snet{
 	class Task{
 	public:
 

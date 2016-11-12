@@ -1,6 +1,6 @@
 #include "tcp_server.hpp"
 
-using namespace nsa;
+using namespace snet;
 
 TcpAcceptor::~TcpAcceptor(){
 	close();

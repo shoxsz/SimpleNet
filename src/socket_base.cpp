@@ -1,6 +1,6 @@
 #include "socket_base.hpp"
 
-using namespace nsa;
+using namespace snet;
 
 InternetAddress::InternetAddress(short family, unsigned int host, unsigned short port){
 	this->family = family;
@@ -27,9 +27,9 @@ void InternetAddress::setHost(const std::string &host){
 	else{
 		this->host = inet_addr(host.c_str());
 
-		//a string host não representa um ip válido...
+		//the string does not represent a valid host...
 		if (this->host == INADDR_NONE){
-			//... tentamos indetifica-la como uma url
+			//... try to identify it as an URL
 			struct hostent *h;
 
 			if ((h = gethostbyname(host.c_str()))){
@@ -63,23 +63,6 @@ sockaddr_in InternetAddress::toOld()const{
 	return sock;
 }
 
-WSADATA Socket::initWinApiSock(){
-#ifdef _WIN32
-	WSADATA data;
-	if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
-		throw SocketError(Exception::getSystemError());
-#endif
-
-	return data;
-}
-
-void Socket::shutDownWinApiSock(){
-#ifdef _WIN32
-	if (WSACleanup() == SOCKET_ERROR)
-		throw SocketError(Exception::getSystemError());
-#endif
-}
-
 Socket::Socket(){
 	sock_fd = 0;
 	valid = false;
@@ -101,8 +84,12 @@ void Socket::create(int domain, int type, int protocol){
 
 void Socket::close(){
 	if (isValid()){
-		shutdown();
+		closing();
+#ifdef _WIN32
 		closesocket(sock_fd);
+#else
+		close(sock_fd);
+#endif
 		valid = false;
 	}
 }

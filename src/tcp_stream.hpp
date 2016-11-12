@@ -5,13 +5,12 @@
 
 #include <memory>
 
-namespace nsa{
+namespace snet{
 	class TcpStream : public SocketStream{
 	public:
 		friend class TcpServer;
 
 		TcpStream() : SocketStream() {}
-		TcpStream(NetworkMessagePtr input, NetworkMessagePtr output) : SocketStream(input, output) {}
 		~TcpStream(){}
 
 		void open(const InternetAddress& address);
@@ -24,9 +23,9 @@ namespace nsa{
 
 		int read(unsigned int bytes);
 
-		const InternetAddress& getDestination()const{ return dest; }
+		const InternetAddress& getEndpoint()const{ return endpoint; }
 	private:
-		InternetAddress dest;
+		InternetAddress endpoint;
 	};
 
 	typedef std::shared_ptr<TcpStream> TcpStreamPtr;

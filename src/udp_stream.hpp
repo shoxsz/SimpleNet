@@ -3,7 +3,7 @@
 
 #include "socket_stream.hpp"
 
-namespace nsa{
+namespace snet{
 	class UdpStream : public SocketStream{
 	public:
 		UdpStream() : SocketStream() {}
