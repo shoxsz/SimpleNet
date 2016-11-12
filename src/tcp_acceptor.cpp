@@ -24,7 +24,7 @@ bool TcpAcceptor::listen(){
 	}
 	else{
 		listening = false;
-		TcpStream* newConn = new TcpStream();
+		TcpStreamPtr newConn = TcpStreamPtr(new TcpStream());
 		newConn->address.fromOld(clientAddr);
 		newConn->dest = address;
 		newConn->sock_fd = clientFd;

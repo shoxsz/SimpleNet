@@ -9,9 +9,19 @@ namespace snet{
 	/*A network message is a simple buffer to write and read data*/
 	class NetworkMessage{
 	public:
+
 		NetworkMessage(){
 			buffer = nullptr;
 			buffSize = position = length = 0;
+		}
+
+		NetworkMessage(unsigned int size){
+			resize(size);
+		}
+
+		NetworkMessage(const char* buffer, unsigned int size){
+			resize(size);
+			put(buffer, size);
 		}
 
 		NetworkMessage(const NetworkMessage& networkMessage){

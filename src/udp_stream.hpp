@@ -12,11 +12,8 @@ namespace snet{
 
 		void open(unsigned short port);
 
-		int send();
-		int send(unsigned int bytes);
-
-		int read();
-		int read(unsigned int bytes);
+		int send(const NetworkMessage& msg);
+		int read(NetworkMessage& msg);
 
 		void setEndpoint(const InternetAddress& endpoint){
 			this->endpoint = endpoint;

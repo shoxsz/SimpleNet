@@ -12,46 +12,36 @@ void UdpStream::open(unsigned short port){
 	addr.sin_addr.s_addr = INADDR_ANY;
 
 	if (::bind(sock_fd, (struct sockaddr*)&addr, sizeof(sockaddr)) == SOCKET_ERROR){
-		throw SocketError(Exception::getSystemError());
+		throw SocketError();
 	}
 
 	address.fromOld(addr);
 }
 
-int UdpStream::send(){
-	return send(output->getLength());
-}
-
-int UdpStream::send(unsigned int bytes){
+int UdpStream::send(const NetworkMessage& msg){
 	struct sockaddr_in o_addr = endpoint.toOld();
 	unsigned int sent;
 
-	output->setPosition(0);
-	if ((sent = sendto(sock_fd, output->data(), gmin(bytes, output->getLength()), 0, (struct sockaddr*)&o_addr, sizeof(struct sockaddr))) == SOCKET_ERROR){
-		throw SocketError(Exception::getSystemError());
+	if ((sent = sendto(sock_fd, msg->data(), gmin(bytes, msg->getLength()), 0, (struct sockaddr*)&o_addr, sizeof(struct sockaddr))) == SOCKET_ERROR){
+		throw SocketError();
 	}
 
 	return sent;
 }
 
-int UdpStream::read(){
-	return read(getAvailableData());
-}
-
-int UdpStream::read(unsigned int bytes){
+int UdpStream::read(NetworkMessage& msg){
 	struct sockaddr_in o_addr;
 	unsigned int read;
 	int l = sizeof(struct sockaddr);
 
-	input->resize(bytes, false);
-	input->clear();
-	if ((read = recvfrom(sock_fd, input->data(), bytes, 0, (struct sockaddr*)&o_addr, &l)) == SOCKET_ERROR){
-		throw SocketError(Exception::getSystemError());
+	msg->clear();
+	if ((read = recvfrom(sock_fd, msg->data(), msg.getbuffSize(), 0, (struct sockaddr*)&o_addr, &l)) == SOCKET_ERROR){
+		throw SocketError();
 	}
 
 	if (read == 0){
 		this->close();
-		throw SocketError(Exception::getSystemError());
+		throw SocketError();
 	}
 
 	endpoint.fromOld(o_addr);

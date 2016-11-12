@@ -26,7 +26,7 @@ namespace snet{
 		TcpAcceptor():listening(false), bound(false){}
 		virtual ~TcpAcceptor();
 
-		virtual void onAccept(TcpStream* stream) = 0;
+		virtual void onAccept(TcpStreamPtr stream) = 0;
 
 		virtual void error(ErrorStage errorStage, SocketError& ex) = 0;
 

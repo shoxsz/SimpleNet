@@ -10,18 +10,10 @@ namespace snet{
 	public:
 		friend class TcpAcceptor;
 
-		TcpStream() : SocketStream() {}
-		~TcpStream(){}
-
 		void open(const InternetAddress& address);
 
-		int send();
-
-		int send(unsigned int bytes);
-
-		int read();
-
-		int read(unsigned int bytes);
+		int send(const NetworkMessage& msg);
+		int read(NetworkMessage& msg);
 
 		const InternetAddress& getEndpoint()const{ return endpoint; }
 	private:
