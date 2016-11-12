@@ -35,6 +35,8 @@ namespace snet{
 				thread.join();
 		}
 
+		unsigned int getId()const{return thread.get_id();}
+
 		ThreadState getState()const{ return threadState; }
 
 	protected:

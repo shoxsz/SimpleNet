@@ -1,8 +1,6 @@
 #ifndef _CONNECTION_MANAGER_HPP_
 #define _CONNECTION_MANAGER_HPP_
 
-#include "connection.hpp"
-
 #include <unordered_map>
 
 namespace snet{
@@ -32,7 +30,7 @@ namespace snet{
         void add(Service* service){
             if(services.find(service->managedId) == services.end()){
                 service->manager = this;
-                service->managedId = (unsigned int)(&service);
+                service->managedId = service->
                 services[service->managedId].reset(new ServiceThreadPtr(service));
             }
         }

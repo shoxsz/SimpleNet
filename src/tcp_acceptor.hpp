@@ -28,7 +28,7 @@ namespace snet{
 
 		virtual void onAccept(TcpStream* stream) = 0;
 
-		virtual void error(ErrorStage errorStage, const std::string& description) = 0;
+		virtual void error(ErrorStage errorStage, SocketError& ex) = 0;
 
 		bool bind(unsigned short port, unsigned int blocklog = defaultBlocklog);
 
@@ -51,7 +51,7 @@ namespace snet{
 		}
 
 	protected:
-		void shutdown();
+		void closing();
 
 		bool listening, bound;
 		unsigned int blocklog;

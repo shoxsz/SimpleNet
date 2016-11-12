@@ -1,4 +1,4 @@
-#include "tcp_server.hpp"
+#include "tcp_acceptor.hpp"
 
 using namespace snet;
 
@@ -14,11 +14,11 @@ bool TcpAcceptor::listen(){
 	if (!isValid())
 		throw SocketError("You must bind the server to a port first!");
 
-	if ((clientFd = accept(sock_fd, (sockaddr*)&clientAddr, &clientLength)) == SOCKET_ERROR){
+	if ((clientFd = accept(sock_fd, (sockaddr*)&clientAddr, &clientLength)) == INVALID_SOCKET){
 		//if listening is true then acceptor wasn't stopped, this means we got an error...
 		if (listening){
 			listening = false;
-			error(ACCEPTING, Exception::getSystemError());
+			error(ACCEPTING, SocketError());
 			return false;
 		}
 	}
@@ -44,7 +44,7 @@ bool TcpAcceptor::bind(unsigned short port, unsigned int blocklog){
 		create(AF_INET, SOCK_STREAM, 0);
 	}
 	catch (SocketError& ex){
-		error(CREATION, ex.what());
+		error(CREATION, ex);
 		return false;
 	}
 
@@ -53,12 +53,12 @@ bool TcpAcceptor::bind(unsigned short port, unsigned int blocklog){
 	addr.sin_port = htons(port);
 
 	if (::bind(sock_fd, (sockaddr*)&addr, sizeof(sockaddr)) == SOCKET_ERROR){
-		error(BINDING, Exception::getSystemError());
+		error(BINDING, SocketError());
 		return false;
 	}
 
 	if (::listen(sock_fd, blocklog) == SOCKET_ERROR){
-		error(LISTENING, Exception::getSystemError());
+		error(LISTENING, SocketError());
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool TcpAcceptor::bind(unsigned short port, unsigned int blocklog){
 	return true;
 }
 
-void TcpAcceptor::shutdown(){
+void TcpAcceptor::closing(){
 	if (listening){
 		bound = false;
 		listening = false;

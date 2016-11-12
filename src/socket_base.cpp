@@ -2,6 +2,29 @@
 
 using namespace snet;
 
+std::string SocketError::lastError(){
+	int error, size;
+	char *buffer;
+	
+	std::lock_guard locker(excLocker);//strerror is not thread-safe and Format
+#ifdef _WIN32
+	error = WSAGetLastError();
+	if(FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+		nullptr,
+		error,
+		0,
+		(LPTSTR)&buffer,
+		20,//random :p
+		nullptr) == 0)
+			return std::string("failed to read system error!");
+#else
+	error = errno;
+	buffer = strerror();
+#endif
+	return std::string(buffer);
+}
+
 InternetAddress::InternetAddress(short family, unsigned int host, unsigned short port){
 	this->family = family;
 	this->host = host;
@@ -36,7 +59,7 @@ void InternetAddress::setHost(const std::string &host){
 				memcpy(&this->host, h->h_addr, h->h_length);
 			}
 			else
-				throw(SocketError("Invalid host!"));
+				throw SocketError("Invalid host!");
 		}
 	}
 }
@@ -48,7 +71,7 @@ std::string InternetAddress::getIp() const{
 	addr.s_addr = host;
 
 	if (!(c_ip = inet_ntoa(addr)))
-		throw(SocketError("Invalid host!"));
+		throw SocketError("Invalid host!");
 
 	return std::string(c_ip, strlen(c_ip));
 }
@@ -76,7 +99,7 @@ void Socket::create(int domain, int type, int protocol){
 	int _return;
 
 	if ((_return = socket(domain, type, protocol)) == SOCKET_ERROR)
-		throw SocketError(Exception::getSystemError());
+		throw SocketError();
 
 	sock_fd = _return;
 	valid = true;
@@ -84,13 +107,19 @@ void Socket::create(int domain, int type, int protocol){
 
 void Socket::close(){
 	if (isValid()){
+		int r = 0;
+
 		closing();
 #ifdef _WIN32
-		closesocket(sock_fd);
+		r = closesocket(sock_fd);
 #else
-		close(sock_fd);
+		r = close(sock_fd);
 #endif
-		valid = false;
+		if(r != 0){
+			throw SocketError();
+		}else{
+			valid = false;
+		}
 	}
 }
 
@@ -100,12 +129,12 @@ u_long Socket::getAvailableData(){
 #ifdef _WIN32
 
 	if (ioctlsocket(sock_fd, FIONREAD, &available) == SOCKET_ERROR)
-		throw SocketError(Exception::getSystemError());
+		throw SocketError();
 
 #else
 
 	if (ioctl(sock_fd, I_NREAD, &available) == SOCKET_ERROR){
-		return setError(Exception::getSystemError()), SOCKET_ERROR);
+		throw SocketError();
 
 #endif // _WIN32
 

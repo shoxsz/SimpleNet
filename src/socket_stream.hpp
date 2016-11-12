@@ -5,7 +5,7 @@
 #include "network_message.hpp"
 
 namespace snet{
-	/*A socket stream is used to keep a message flow with an endpoint socket*/
+	/*A socket stream is used to keep a message flow within a socket*/
 	class SocketStream : public Socket{
 	public:
 		enum {defaultBufferSize = 1024}

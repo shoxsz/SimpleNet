@@ -4,6 +4,7 @@
 #include <string>
 #include <chrono>
 #include <exception>
+#include <mutex>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -13,6 +14,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#define SOCKET_ERROR (-1)
+#define INVALID_SOCKET (-1)
+
 #endif
 
 namespace snet{
@@ -35,7 +40,10 @@ namespace snet{
     public:
         SocketError(const char* error) : std::exception(error){}
         SocketError(const std::string& error) : std::exception(error.c_str()){}
+		SocketError() : std::exception(lastError()){}
     private:
+		static std::mutex excLocker; //used while reading the system error message
+		std::string lastError();	 //get the last error from the system
     };
 
 	/*InternetAddress simply wraps the sockaddr_in structure, it also provides

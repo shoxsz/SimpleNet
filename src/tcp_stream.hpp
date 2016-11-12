@@ -8,7 +8,7 @@
 namespace snet{
 	class TcpStream : public SocketStream{
 	public:
-		friend class TcpServer;
+		friend class TcpAcceptor;
 
 		TcpStream() : SocketStream() {}
 		~TcpStream(){}
