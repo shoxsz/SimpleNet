@@ -130,8 +130,8 @@ void Socket::close(){
 	}
 }
 
-u_long Socket::getAvailableData(){
-	u_long available = 0;
+unsigned long Socket::getAvailableData(){
+	unsigned long available = 0;
 
 #ifdef _WIN32
 

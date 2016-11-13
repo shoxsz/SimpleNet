@@ -3,7 +3,7 @@
 
 #include <string>
 #include <chrono>
-#include <exception>
+#include <stdexcept>
 #include <mutex>
 
 #ifdef _WIN32
@@ -22,10 +22,10 @@
 #endif
 
 namespace snet{
-	class SocketError : public std::exception{
+	class SocketError : public std::runtime_error{
     public:
-        SocketError(const char* error) : std::exception(error){}
-        SocketError(const std::string& error) : std::exception(error.c_str()){}
+        SocketError(const char* error) : std::runtime_error(error){}
+        SocketError(const std::string& error) : std::runtime_error(error.c_str()){}
 		SocketError() : SocketError(lastError()){}
     private:
 		static std::mutex excLocker; //used while reading the system error message
@@ -101,7 +101,7 @@ namespace snet{
 			return testOperation(sock_fd, EXCEPTION, 0);
 		}
 
-		unsigned short getSocketFD(){ return sock_fd; }
+		unsigned int getSocketFD(){ return sock_fd; }
 		InternetAddress getLocalAddress(){ return address; }
 		bool isValid(){ return valid; }
 
@@ -109,7 +109,7 @@ namespace snet{
 		//will be called in the close method before the socket is closed.
 		virtual void closing(){}
 
-		unsigned short sock_fd;
+		unsigned int sock_fd;
 		bool valid;
 		InternetAddress address;
 
@@ -121,7 +121,7 @@ namespace snet{
 		};
 
 		/*test if the specific operation is available for this socket*/
-		bool testOperation(unsigned short sock, OPERATION operation, long long timeout){
+		bool testOperation(unsigned int sock, OPERATION operation, long long timeout){
 			int r;
 			struct timeval t_out;
 			fd_set fds;

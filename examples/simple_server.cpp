@@ -22,7 +22,7 @@ int main(){
 #endif
         server.bind(80, 1);
         while(server.listen());
-    }catch(std::exception& ex){
+    }catch(const snet::SocketError& ex){
         std::cout << "Error: " << ex.what() << std::endl;
     }
 
@@ -45,16 +45,19 @@ void SimpleServer::onAccept(snet::TcpStreamPtr stream){
 
         if(size > 20){
             sendStringTooBig(stream);
+			std::cout << "client sent a invalid string!\n";
         }else{
             password = input.getString(size);
             if(password == "wordpass"){
                 sendResult(stream, true);
+				std::cout << "client authenticated!\n";
             }else{
                 sendResult(stream, false);
+				std::cout << "client not authenticated!\n";
             }
         }
     }else{
-        std::cout << "Client timed out!";
+        std::cout << "client timed out!";
     }
     stream->close();
 }

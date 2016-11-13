@@ -9,7 +9,7 @@ TcpAcceptor::~TcpAcceptor(){
 bool TcpAcceptor::listen(){
 	struct sockaddr_in clientAddr;
 	int clientLength;
-	unsigned short clientFd;
+	unsigned int clientFd;
 
 	if (!isValid())
 		throw SocketError("You must bind the server to a port first!");
