@@ -59,6 +59,10 @@ void SimpleServer::onAccept(snet::TcpStreamPtr stream){
     stream->close();
 }
 
+void SimpleServer::error(ErrorStage errStage, snet::SocketError& error){
+	throw error;
+}
+
 void SimpleServer::sendStringTooBig(snet::TcpStreamPtr stream){
     snet::NetworkMessage msg(256);
 

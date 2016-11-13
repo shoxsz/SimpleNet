@@ -3,18 +3,20 @@
 using namespace snet;
 
 #ifdef _WIN32
-WSADATA initWinApiSock() {
+WSADATA snet::initWinApiSock() {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
 		throw SocketError();
 	return data;
 }
 
-void shutDownWinApiSock() {
+void snet::shutDownWinApiSock() {
 	if (WSACleanup() == SOCKET_ERROR)
 		throw SocketError();
 }
 #endif
+
+std::mutex SocketError::excLocker;
 
 std::string SocketError::lastError(){
 	int error;
@@ -50,15 +52,15 @@ InternetAddress::InternetAddress(const std::string& host, unsigned short port){
 }
 
 InternetAddress InternetAddress::fromOld(const sockaddr_in& address){
-	return InternetAddress(old.sin_addr.s_addr, old.sin_port);
+	return InternetAddress(address.sin_addr.s_addr, address.sin_port);
 }
 
-sockaddr_in InternetAddress::toOld(const InternetAddress& address)const{
+sockaddr_in InternetAddress::toOld(const InternetAddress& address){
 	sockaddr_in sock;
 
 	sock.sin_family = AF_INET;
-	sock.sin_port = htons(port);
-	sock.sin_addr.s_addr = host;
+	sock.sin_port = htons(address.port);
+	sock.sin_addr.s_addr = address.host;
 
 	return sock;
 }

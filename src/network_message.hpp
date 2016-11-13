@@ -46,7 +46,7 @@ namespace snet{
 		}
 
 		void setSender(const InternetAddress& sender){
-			this.sender = sender;
+			this->sender = sender;
 		}
 
 		void resize(unsigned int size, bool copy = true){

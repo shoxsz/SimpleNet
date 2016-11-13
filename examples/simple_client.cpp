@@ -15,7 +15,7 @@ int main(){
 #ifdef _WIN32
         snet::initWinApiSock();
 #endif
-        stream.open(snet::InternetAddress(AF_INET, "127.0.0.1", 80));
+        stream.open(snet::InternetAddress(std::string("127.0.0.1"), 80));
 
         std::cout << "connection stabilished!\n";
         std::cout << "Inform the password: ";
@@ -63,7 +63,7 @@ int main(){
 
     stream.close();
 
-#ifndef _WIN32
+#ifdef _WIN32
     snet::shutDownWinApiSock();
 #endif
 

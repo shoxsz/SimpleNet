@@ -27,8 +27,7 @@ target_link_libraries(SimpleNet ws2_32)
 endif(WIN32)
 
 #set the lib directory
-set_target_properties(SimpleNet PROPERTIES
-         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
 #build examples
 add_subdirectory(examples)

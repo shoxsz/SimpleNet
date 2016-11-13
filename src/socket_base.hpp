@@ -8,7 +8,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#include <ws2tcpip.h>
+#include <ws2tcpip.h>//this is for future support for ipv6
 #else
 #include <sys/types.h>
 #include <sys/sockets.h>
@@ -36,14 +36,14 @@ namespace snet{
 	it also provide methods to simplify host validation and methods to convert to/from sockaddr_in struct*/
 	class InternetAddress{
 	public:
-		InternetAddress()
+		InternetAddress():
 			host(0),
 			port(0){}
 		InternetAddress(unsigned int host, unsigned short port);
 		InternetAddress(const std::string& host, unsigned short port);
 
 		static InternetAddress fromOld(const sockaddr_in& address);
-		static SOCKADDR_IN toOld(const IntenetAddres& address)const;
+		static SOCKADDR_IN toOld(const InternetAddress& address);
 
 		void setHost(unsigned int host){
 			this->host = host;
