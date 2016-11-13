@@ -9,6 +9,7 @@
 
 namespace snet{
 	/*A network message is a simple buffer to write and read data*/
+	/*REVIEW THIS CLASS*/
 	class NetworkMessage{
 	public:
 
@@ -17,16 +18,16 @@ namespace snet{
 			buffSize = position = length = 0;
 		}
 
-		NetworkMessage(unsigned int size){
+		NetworkMessage(unsigned int size) : NetworkMessage(){
 			resize(size);
 		}
 
-		NetworkMessage(const char* buffer, unsigned int size){
+		NetworkMessage(const char* buffer, unsigned int size) : NetworkMessage() {
 			resize(size);
 			put(buffer, size);
 		}
 
-		NetworkMessage(const NetworkMessage& networkMessage){
+		NetworkMessage(const NetworkMessage& networkMessage) : NetworkMessage() {
 			resize(networkMessage.length);
 			put(networkMessage.buffer, networkMessage.buffSize);
 			position = networkMessage.position;
@@ -49,23 +50,21 @@ namespace snet{
 			this->sender = sender;
 		}
 
-		void resize(unsigned int size, bool copy = true){
+		void resize(unsigned int size){
 			char* new_buffer = new char[size];
 
 			if (buffer != nullptr){
-				if (copy){
-					length = std::min<unsigned int>(length, size);
-					position = std::min<unsigned int>(length, position);
-					memcpy(new_buffer, buffer, length);
-				}
-				else
-					clear();
+				length = std::min<unsigned int>(length, size);
+				position = std::min<unsigned int>(length - 1, position);
+				memcpy(new_buffer, buffer, length);
 				delete buffer;
 			}
+
 			buffSize = size;
 			buffer = new_buffer;
 		}
 
+		/*put data inside the buffer in the current position*/
 		void put(const char* buffer, unsigned int size){
 			size = std::min<unsigned int>(size, (buffSize - position));
 			memcpy((this->buffer + position), buffer, size);
@@ -88,7 +87,7 @@ namespace snet{
 		}
 
 		std::string getString(unsigned int length){
-			return std::string(get(length));
+			return std::string(get(length), length);
 		}
 
 		void clear(){
@@ -101,7 +100,8 @@ namespace snet{
 		}
 
 		char* data()const{ return buffer; }
-		void setPosition(unsigned int position){ this->position = std::min<unsigned int>(position, length); }
+		void setLength(unsigned int length) { this->length = std::min<unsigned int>(length, buffSize); }
+		void setPosition(unsigned int position){ this->position = std::min<unsigned int>(position, length - 1); }
 		void skipBytes(unsigned int skippedBytes){ setPosition(position + skippedBytes); }
 		unsigned int getPosition()const{ return position; }
 		unsigned int getbuffSize()const{ return buffSize; }

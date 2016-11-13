@@ -5,10 +5,11 @@ using namespace snet;
 void UdpStream::open(unsigned short port){
 	struct sockaddr_in addr;
 
+	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
-	if (::bind(sock_fd, (struct sockaddr*)&addr, sizeof(sockaddr)) == SOCKET_ERROR){
+	if (::bind(sock_fd, (struct sockaddr*)&addr, sizeof(struct sockaddr)) == SOCKET_ERROR){
 		throw SocketError();
 	}
 
@@ -36,12 +37,13 @@ int UdpStream::internalRead(NetworkMessage& msg, int flags){
 		throw SocketError();
 	}
 
-	if (read == 0){
+	if (read == 0 && msg.getbuffSize() > 0){
 		this->close();
 		throw SocketError();
 	}
 
 	msg.setSender(InternetAddress::fromOld(o_addr));
+	msg.setLength(read);
 
 	return read;
 }

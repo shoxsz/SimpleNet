@@ -23,7 +23,7 @@ int main(){
 
         if(stream.waitWrite(TIMEOUT)){
             if(password.size() > PASSWORD_MAX_SIZE){
-                std::cout << "Password max length is " << PASSWORD_MAX_SIZE << ", the password suplied will be truncated to that size!\n";
+                std::cout << "Password max length is " << PASSWORD_MAX_SIZE << ", the password suplied will be truncated to this size!\n";
                 password.resize(PASSWORD_MAX_SIZE);
             }
             output.resize(password.size());

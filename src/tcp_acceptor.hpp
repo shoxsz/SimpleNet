@@ -10,28 +10,17 @@
 namespace snet{
 	class TcpAcceptor : public Socket{
 	public:
-		enum ErrorStage{
-			CREATION = 0,
-			BINDING,
-			LISTENING,
-			ACCEPTING
-		};
-
 		enum { defaultBlocklog = 10 };
 
 		TcpAcceptor(const TcpAcceptor& server) = delete;
 		TcpAcceptor& operator=(const TcpAcceptor& server) = delete;
 
 		TcpAcceptor():listening(false), bound(false){}
-		virtual ~TcpAcceptor();
+		~TcpAcceptor();
 
-		virtual void onAccept(TcpStreamPtr stream) = 0;
+		void bind(unsigned short port, unsigned int blocklog = defaultBlocklog);
 
-		virtual void error(ErrorStage errorStage, SocketError& ex) = 0;
-
-		bool bind(unsigned short port, unsigned int blocklog = defaultBlocklog);
-
-		bool listen();
+		TcpStreamPtr listen();
 
 		unsigned int getBlocklog()const{
 			return blocklog;
@@ -49,7 +38,7 @@ namespace snet{
 			return bound;
 		}
 
-	protected:
+	private:
 		void closing();
 
 		bool listening, bound;

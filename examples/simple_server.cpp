@@ -2,26 +2,22 @@
 #include <string>
 #include <simplenet.hpp>
 
-class SimpleServer : public snet::TcpAcceptor{
-public:
-    static const std::chrono::milliseconds TIMEOUT;
-
-    void onAccept(snet::TcpStreamPtr stream);
-    void error(ErrorStage errStage, snet::SocketError& error);
-private:
-    void sendStringTooBig(snet::TcpStreamPtr stream);
-    void sendResult(snet::TcpStreamPtr stream, bool ok);
-};
+void onAccept(snet::TcpStreamPtr stream);
+void sendStringTooBig(snet::TcpStreamPtr stream);
+void sendResult(snet::TcpStreamPtr stream, bool ok);
 
 int main(){
-    SimpleServer server;
+    snet::TcpAcceptor server;
+    snet::TcpStreamPtr client;
 
     try{
 #ifdef _WIN32
         snet::initWinApiSock();
 #endif
         server.bind(80, 1);
-        while(server.listen());
+        while((client = server.listen()) != nullptr){
+            onAccept(client);
+        }
     }catch(const snet::SocketError& ex){
         std::cout << "Error: " << ex.what() << std::endl;
     }
@@ -29,15 +25,16 @@ int main(){
 #ifdef _WIN32
         snet::shutDownWinApiSock();
 #endif
+	
+	server.close();
 
     return 0;
 }
 
-const std::chrono::milliseconds SimpleServer::TIMEOUT = std::chrono::milliseconds(10000);
-
-void SimpleServer::onAccept(snet::TcpStreamPtr stream){
+void onAccept(snet::TcpStreamPtr stream){
+	const std::chrono::milliseconds TIMEOUT = std::chrono::milliseconds(10000);
     std::string password;
-    snet::NetworkMessage input;
+    snet::NetworkMessage input(2048);
 
     std::cout << "New connection from " << stream->getEndpoint().getIp() << std::endl;
     if(stream->waitRead(TIMEOUT)){
@@ -47,6 +44,7 @@ void SimpleServer::onAccept(snet::TcpStreamPtr stream){
             sendStringTooBig(stream);
 			std::cout << "client sent a invalid string!\n";
         }else{
+			stream->read(input);
             password = input.getString(size);
             if(password == "wordpass"){
                 sendResult(stream, true);
@@ -62,11 +60,7 @@ void SimpleServer::onAccept(snet::TcpStreamPtr stream){
     stream->close();
 }
 
-void SimpleServer::error(ErrorStage errStage, snet::SocketError& error){
-	throw error;
-}
-
-void SimpleServer::sendStringTooBig(snet::TcpStreamPtr stream){
+void sendStringTooBig(snet::TcpStreamPtr stream){
     snet::NetworkMessage msg(256);
 
     msg.put<int>(0);
@@ -76,7 +70,7 @@ void SimpleServer::sendStringTooBig(snet::TcpStreamPtr stream){
     stream->send(msg);
 }
 
-void SimpleServer::sendResult(snet::TcpStreamPtr stream, bool ok){
+void sendResult(snet::TcpStreamPtr stream, bool ok){
     snet::NetworkMessage msg(256);
 
     if(ok){
