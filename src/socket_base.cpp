@@ -2,11 +2,25 @@
 
 using namespace snet;
 
+#ifdef _WIN32
+WSADATA initWinApiSock() {
+	WSADATA data;
+	if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
+		throw SocketError();
+	return data;
+}
+
+void shutDownWinApiSock() {
+	if (WSACleanup() == SOCKET_ERROR)
+		throw SocketError();
+}
+#endif
+
 std::string SocketError::lastError(){
-	int error, size;
+	int error;
 	char *buffer;
 	
-	std::lock_guard locker(excLocker);//strerror is not thread-safe and Format
+	std::lock_guard<std::mutex> locker(excLocker);//strerror is not thread-safe and Format
 #ifdef _WIN32
 	error = WSAGetLastError();
 	if(FormatMessage(
@@ -25,22 +39,28 @@ std::string SocketError::lastError(){
 	return std::string(buffer);
 }
 
-InternetAddress::InternetAddress(short family, unsigned int host, unsigned short port){
-	this->family = family;
+InternetAddress::InternetAddress(unsigned int host, unsigned short port){
 	this->host = host;
 	this->port = port;
 }
 
-InternetAddress::InternetAddress(short family, const std::string& host, unsigned short port){
+InternetAddress::InternetAddress(const std::string& host, unsigned short port){
 	setHost(host);
-	this->family = family;
 	this->port = port;
 }
 
-void InternetAddress::fromOld(sockaddr_in old){
-	family = old.sin_family;
-	host = old.sin_addr.s_addr;
-	port = old.sin_port;
+InternetAddress InternetAddress::fromOld(const sockaddr_in& address){
+	return InternetAddress(old.sin_addr.s_addr, old.sin_port);
+}
+
+sockaddr_in InternetAddress::toOld(const InternetAddress& address)const{
+	sockaddr_in sock;
+
+	sock.sin_family = AF_INET;
+	sock.sin_port = htons(port);
+	sock.sin_addr.s_addr = host;
+
+	return sock;
 }
 
 void InternetAddress::setHost(const std::string &host){
@@ -48,10 +68,8 @@ void InternetAddress::setHost(const std::string &host){
 		this->host = INADDR_ANY;
 	}
 	else{
-		this->host = inet_addr(host.c_str());
-
-		//the string does not represent a valid host...
-		if (this->host == INADDR_NONE){
+		//the string does not represent a valid ipv4...
+		if (inet_pton(AF_INET, host.c_str(), &this->host) == 0){
 			//... try to identify it as an URL
 			struct hostent *h;
 
@@ -65,25 +83,12 @@ void InternetAddress::setHost(const std::string &host){
 }
 
 std::string InternetAddress::getIp() const{
-	char* c_ip;
-	struct in_addr addr;
+	char ip_buff[17];
 
-	addr.s_addr = host;
-
-	if (!(c_ip = inet_ntoa(addr)))
+	if (inet_ntop(AF_INET, (void*)&host, ip_buff, 16) == nullptr)
 		throw SocketError("Invalid host!");
 
-	return std::string(c_ip, strlen(c_ip));
-}
-
-sockaddr_in InternetAddress::toOld()const{
-	sockaddr_in sock;
-
-	sock.sin_family = family;
-	sock.sin_port = htons(port);
-	sock.sin_addr.s_addr = host;
-
-	return sock;
+	return std::string(ip_buff);
 }
 
 Socket::Socket(){

@@ -2,12 +2,9 @@
 
 using namespace snet;
 
-#define gmin(a, b) (((a) < (b)) ? (a) : (b))
-
 void UdpStream::open(unsigned short port){
 	struct sockaddr_in addr;
 
-	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
@@ -19,23 +16,23 @@ void UdpStream::open(unsigned short port){
 }
 
 int UdpStream::send(const NetworkMessage& msg){
-	struct sockaddr_in o_addr = endpoint.toOld();
+	struct sockaddr_in o_addr = InternetAddress::toOld(msg.getSender());
 	unsigned int sent;
 
-	if ((sent = sendto(sock_fd, msg->data(), gmin(bytes, msg->getLength()), 0, (struct sockaddr*)&o_addr, sizeof(struct sockaddr))) == SOCKET_ERROR){
+	if ((sent = sendto(sock_fd, msg.data(), msg.getLength(), 0, (struct sockaddr*)&o_addr, sizeof(struct sockaddr))) == SOCKET_ERROR){
 		throw SocketError();
 	}
 
 	return sent;
 }
 
-int UdpStream::read(NetworkMessage& msg){
+int UdpStream::internalRead(NetworkMessage& msg, int flags){
 	struct sockaddr_in o_addr;
 	unsigned int read;
 	int l = sizeof(struct sockaddr);
 
-	msg->clear();
-	if ((read = recvfrom(sock_fd, msg->data(), msg.getbuffSize(), 0, (struct sockaddr*)&o_addr, &l)) == SOCKET_ERROR){
+	msg.setPosition(0);
+	if ((read = recvfrom(sock_fd, msg.data(), msg.getbuffSize(), flags, (struct sockaddr*)&o_addr, &l)) == SOCKET_ERROR){
 		throw SocketError();
 	}
 
@@ -44,7 +41,7 @@ int UdpStream::read(NetworkMessage& msg){
 		throw SocketError();
 	}
 
-	endpoint.fromOld(o_addr);
+	msg.setSender(InternetAddress::fromOld(o_addr));
 
 	return read;
 }

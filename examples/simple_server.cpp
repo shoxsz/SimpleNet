@@ -7,11 +7,11 @@ public:
     static const std::chrono::milliseconds TIMEOUT;
 
     void onAccept(snet::TcpStreamPtr stream);
-    void error(snet::ErrorStage errStage, snet::SocketError& error);
+    void error(ErrorStage errStage, snet::SocketError& error);
 private:
     void sendStringTooBig(snet::TcpStreamPtr stream);
     void sendResult(snet::TcpStreamPtr stream, bool ok);
-}
+};
 
 int main(){
     SimpleServer server;
@@ -33,11 +33,11 @@ int main(){
     return 0;
 }
 
-const SimpleServer::TIMEOUT = std::chrono::milliseconds(10000);
+const std::chrono::milliseconds SimpleServer::TIMEOUT = std::chrono::milliseconds(10000);
 
 void SimpleServer::onAccept(snet::TcpStreamPtr stream){
     std::string password;
-    snet::InternetAddress input;
+    snet::NetworkMessage input;
 
     std::cout << "New connection from " << stream->getEndpoint().getIp() << std::endl;
     if(stream->waitRead(TIMEOUT)){
@@ -46,7 +46,7 @@ void SimpleServer::onAccept(snet::TcpStreamPtr stream){
         if(size > 20){
             sendStringTooBig(stream);
         }else{
-            password = input.getString();
+            password = input.getString(size);
             if(password == "wordpass"){
                 sendResult(stream, true);
             }else{

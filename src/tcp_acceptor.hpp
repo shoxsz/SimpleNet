@@ -3,7 +3,6 @@
 
 #include "socket_base.hpp"
 #include "tcp_stream.hpp"
-#include "protocol.hpp"
 
 #include <vector>
 #include <memory>

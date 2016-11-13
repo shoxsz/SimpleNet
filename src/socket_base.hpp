@@ -8,6 +8,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <sys/types.h>
 #include <sys/sockets.h>
@@ -21,51 +22,34 @@
 #endif
 
 namespace snet{
-
-#ifdef _WIN32
-	WSADATA initWinApiSock(){
-		WSADATA data;
-		if (WSAStartup(MAKEWORD(2, 2), &data) == SOCKET_ERROR)
-			throw SocketError(Exception::getSystemError());
-		return data;
-	}
-
-	void shutDownWinApiSock(){
-		if (WSACleanup() == SOCKET_ERROR)
-			throw SocketError(Exception::getSystemError());
-	}
-#endif
-
 	class SocketError : public std::exception{
     public:
         SocketError(const char* error) : std::exception(error){}
         SocketError(const std::string& error) : std::exception(error.c_str()){}
-		SocketError() : std::exception(lastError()){}
+		SocketError() : SocketError(lastError()){}
     private:
 		static std::mutex excLocker; //used while reading the system error message
 		std::string lastError();	 //get the last error from the system
     };
 
-	/*InternetAddress simply wraps the sockaddr_in structure, it also provides
-	methods to simplify host validation and methods to convert to/from sockaddr_in struct*/
+	/*InternetAddress simply wraps the sockaddr_in structure(note that the IP version is 4), 
+	it also provide methods to simplify host validation and methods to convert to/from sockaddr_in struct*/
 	class InternetAddress{
 	public:
-		InternetAddress() : family(0),
+		InternetAddress()
 			host(0),
 			port(0){}
-		InternetAddress(short family, unsigned int host, unsigned short port);
-		InternetAddress(short family, const std::string& host, unsigned short port);
-		void fromOld(sockaddr_in sockaddr);
+		InternetAddress(unsigned int host, unsigned short port);
+		InternetAddress(const std::string& host, unsigned short port);
+
+		static InternetAddress fromOld(const sockaddr_in& address);
+		static SOCKADDR_IN toOld(const IntenetAddres& address)const;
 
 		void setHost(unsigned int host){
 			this->host = host;
 		}
 
 		void setHost(const std::string& host);
-
-		void setFamily(short family){
-			this->family = family;
-		}
 		
 		void setPort(unsigned short port){
 			this->port = port;
@@ -73,14 +57,10 @@ namespace snet{
 
 		std::string getIp()const;
 
-		short getFamily()const{ return family; }
 		unsigned int getHost()const{ return host; }
 		unsigned short getPort()const{ return port; }
 
-		SOCKADDR_IN toOld()const;
-
 	private:
-		short family;
 		unsigned int host;
 		unsigned short port;
 	};
@@ -141,13 +121,13 @@ namespace snet{
 		};
 
 		/*test if the specific operation is available for this socket*/
-		bool testOperation(unsigned short sock, OPERATION operation, long timeout){
+		bool testOperation(unsigned short sock, OPERATION operation, long long timeout){
 			int r;
 			struct timeval t_out;
 			fd_set fds;
 
-			t_out.sec = timeout / 1000;
-			t_out.usec = (timeout - t_out.sec * 1000) * 1000000;
+			t_out.tv_sec = (long)(timeout / 1000);
+			t_out.tv_usec = (long)(timeout - t_out.tv_sec * 1000) * 1000000;
 
 			FD_ZERO(&fds);
 			FD_SET(sock, &fds);
@@ -165,7 +145,7 @@ namespace snet{
 			}
 
 			if (r == SOCKET_ERROR)
-				throw SocketError(Exception::getSystemError());
+				throw SocketError();
 
 			if (FD_ISSET(sock, &fds))
 				return true;
@@ -173,6 +153,11 @@ namespace snet{
 			return false;
 		}
 	};
+
+#ifdef _WIN32
+	WSADATA initWinApiSock();
+	void shutDownWinApiSock();
+#endif
 
 };
 

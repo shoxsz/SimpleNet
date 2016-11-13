@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include "socket_base.hpp"
+
 namespace snet{
 	/*A network message is a simple buffer to write and read data*/
 	class NetworkMessage{
@@ -41,6 +43,10 @@ namespace snet{
 		~NetworkMessage(){
 			if (buffer)
 				delete buffer;
+		}
+
+		void setSender(const InternetAddress& sender){
+			this.sender = sender;
 		}
 
 		void resize(unsigned int size, bool copy = true){
@@ -100,6 +106,8 @@ namespace snet{
 		unsigned int getPosition()const{ return position; }
 		unsigned int getbuffSize()const{ return buffSize; }
 		unsigned int getLength()const{ return length; }
+		InternetAddress& getSender(){ return sender; }
+		const InternetAddress getSender()const{ return sender; }
 
 		NetworkMessage& operator=(NetworkMessage networkMessage){
 			std::swap(buffer, networkMessage.buffer);
@@ -119,6 +127,8 @@ namespace snet{
 		unsigned int length;	//number of bytes being used
 		unsigned int buffSize;	//buffer size
 		unsigned int position;	//position of write/read operation
+
+		InternetAddress sender;
 	};
 	typedef std::shared_ptr<NetworkMessage> NetworkMessagePtr;
 };
