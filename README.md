@@ -8,12 +8,14 @@ The API can be divided in two modules: the core and the utility(utility is not a
 
 * ##### The Core
     Contains the base classes used to create and manipulate sockets: **TcpAcceptor**, **UdpStream**, etc, all this classes are non-asynchronous, but they care for thread safety as they are intended to be part of a multi-threaded enviroment.
-* ##### The Utility
-    Contains classes there are meant to extend the API core, they can provide classes to facilitate commom uses of network based applications like: creation of a multi client TCP server or an UDP host to make data streaming. There also helpers classes to create and manipulate threads and services.
+* ##### Utilities
+    The classes here are meant to extend the API core, they can provide classes to facilitate commom uses of network based applications like: creation of a multi client TCP server or an UDP host to make data streaming. There also helpers classes to create and manipulate threads and services.
 ****
 ## SimpleNet current state
 
 **SimpleNet** is currently in development phase, the core classes are almost complete, the next step is to implement some classes in the utility module, in fact, there are already some classes there, they can give you an idea of what can be expected to this module.
+
+**Note from the author:** The API will be slowly updated since i have almost 0 hours of free time, it is uploaded here to also to registry my intention in developing this API.
 
 #### For the future
 The main features that must be implemented are:
