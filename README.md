@@ -17,7 +17,6 @@ All the classes inside the API are inside the `snet` namespace and they can be d
 
 #### TODO
 
-The main features that must be implemented are:
 * Fix NetworkMessage class
 * IPv6 support
 * Add clasess to extend the core
